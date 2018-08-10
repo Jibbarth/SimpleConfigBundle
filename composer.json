@@ -1,0 +1,41 @@
+{
+    "name": "barth/simple-config-bundle",
+    "description": "Expose packages configuration in a view",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jibé Barth",
+            "email": "barth.jib@gmail.com"
+        }
+    ],
+    "require": {
+        "symfony/config": "^3.4|^4.0",
+        "symfony/dependency-injection": "^3.4|^4.0",
+        "symfony/filesystem": "^3.4|^4.0",
+        "symfony/finder": "^3.4|^4.0",
+        "symfony/framework-bundle": "^3.4|^4.0",
+        "symfony/form": "^3.4|^4.0",
+        "symfony/yaml": "^3.4|^4.0",
+        "symfony/http-kernel": "^3.4|^4.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.12",
+        "phpmd/phpmd": "^2.6",
+        "symfony/var-dumper": "^4.1"
+    },
+    "config": {
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true
+    },
+    "autoload": {
+       "psr-4": { "Barth\\SimpleConfigBundle\\": "src/" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}
