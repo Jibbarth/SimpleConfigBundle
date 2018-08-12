@@ -1,0 +1,9 @@
+{% extends "@BarthSimpleConfig/base.html.twig" %}
+
+{% block content %}
+    <h1>{% trans from 'Settings' %}settings{% endtrans %} for {{ extension }}</h1>
+
+    {{ form_start(config_form) }}
+    {{ form_widget(config_form) }}
+    {{ form_end(config_form) }}
+{% endblock %}

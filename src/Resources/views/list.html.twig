@@ -1,0 +1,13 @@
+{% extends "@BarthSimpleConfig/base.html.twig" %}
+
+{% block content %}
+    <ul>
+        {% for bundle in bundles %}
+        <li>
+            <a href="{{ path('barth_simpleconfig_edit', {'package' : bundle}) }}" >
+                Edit {{ bundle }} configuration
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -1,0 +1,15 @@
+services:
+    _defaults:
+        autoconfigure: true
+        autowire: true
+        public: false
+
+        bind:
+            $projectDir: '%kernel.project_dir%'
+
+    Barth\SimpleConfigBundle\:
+        resource: '../../{Service}/*'
+
+    Barth\SimpleConfigBundle\Controller\:
+        resource: '../../Controller'
+        tags: ['controller.service_arguments']
