@@ -2,6 +2,7 @@
 
 namespace Barth\SimpleConfigBundle\Controller;
 
+use Barth\SimpleConfigBundle\NameConverter\SnakeCaseToCamelCaseNameConverter;
 use Barth\SimpleConfigBundle\Service\ConfigService;
 use Barth\SimpleConfigBundle\Service\ExtensionConfigurationService;
 use Barth\SimpleConfigBundle\Service\ExtensionLocatorService;
@@ -86,9 +87,10 @@ class DefaultController extends Controller
             return $this->redirect($this->generateUrl('barth_simpleconfig_index'));
         }
 
+        $nameConverter = new SnakeCaseToCamelCaseNameConverter();
         return $this->render('@BarthSimpleConfig/form.html.twig', [
             'config_form' => $form->createView(),
-            'extension' => $extension->getAlias(),
+            'extension' => $nameConverter->handle($extension->getAlias()),
         ]);
     }
 
