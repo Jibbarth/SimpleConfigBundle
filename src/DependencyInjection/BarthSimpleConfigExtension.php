@@ -39,34 +39,34 @@ class BarthSimpleConfigExtension extends Extension implements PrependExtensionIn
     public function prepend(ContainerBuilder $container)
     {
         $bundles = $container->getParameter('kernel.bundles');
+        $configs = $container->getExtensionConfig($this->getAlias());
+        $config = $this->processConfiguration(new Configuration(), $configs);
 
-        if (isset($bundles['EasyAdminBundle'])) {
-            $config = [
+        if (isset($bundles['EasyAdminBundle']) && $config['enable_easyadmin_integration'] === true) {
+            $easyConfig = [
                 'design' => [
                     'menu' => [[
                         'label' => 'Bundles Configuration',
                         'icon' => 'wrench',
-                        'children' => $this->getEasyAdminChildren($container)
+                        'children' => $this->getEasyAdminChildren($container, $config)
                     ]]
                 ],
             ];
 
-            $container->prependExtensionConfig('easy_admin', $config);
+            $container->prependExtensionConfig('easy_admin', $easyConfig);
         }
     }
 
     /**
      * @param ContainerBuilder $container
+     * @param array $config
      * @return array
      */
-    private function getEasyAdminChildren(ContainerBuilder $container)
+    private function getEasyAdminChildren(ContainerBuilder $container, array $config)
     {
         $extensions = $container->getExtensions();
-        $configs = $container->getExtensionConfig($this->getAlias());
-        $config = $this->processConfiguration(new Configuration(), $configs);
-
-        $childrenConfig = [];
         $nameConverter =  new SnakeCaseToCamelCaseNameConverter();
+        $childrenConfig = [];
 
         foreach ($extensions as $extension) {
             if (!in_array($extension->getAlias(), $config['blacklisted_bundles']) || $config['enable_blacklist'] === false) {
