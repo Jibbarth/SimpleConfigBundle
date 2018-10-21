@@ -2,14 +2,16 @@
 
 namespace Barth\SimpleConfigBundle\DependencyInjection;
 
+use Barth\SimpleConfigBundle\NameConverter\SnakeCaseToCamelCaseNameConverter;
 use Barth\SimpleConfigBundle\Service\ConfigService;
 use Barth\SimpleConfigBundle\Service\ExtensionLocatorService;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
-class BarthSimpleConfigExtension extends Extension
+class BarthSimpleConfigExtension extends Extension implements PrependExtensionInterface
 {
     /**
      * {@inheritdoc}
@@ -24,6 +26,7 @@ class BarthSimpleConfigExtension extends Extension
 
         $container->getDefinition(ConfigService::class)->setArgument(1, $config['override_package_directory']);
         if (true === $config['enable_blacklist']) {
+            $this->blacklistedBundles = $config['blacklisted_bundles'];
             $container
                 ->getDefinition(ExtensionLocatorService::class)
                 ->setArgument(1, $config['blacklisted_bundles']);
@@ -31,24 +34,50 @@ class BarthSimpleConfigExtension extends Extension
     }
 
     /**
+     * @param ContainerBuilder $container
+     */
+    public function prepend(ContainerBuilder $container)
+    {
+        $bundles = $container->getParameter('kernel.bundles');
+
+        if (isset($bundles['EasyAdminBundle'])) {
+            $config = [
+                'design' => [
+                    'menu' => [[
+                        'label' => 'Bundles Configuration',
+                        'icon' => 'wrench',
+                        'children' => $this->getEasyAdminChildren($container)
+                    ]]
+                ],
+            ];
+
+            $container->prependExtensionConfig('easy_admin', $config);
+        }
+    }
+
+    /**
+     * @param ContainerBuilder $container
      * @return array
      */
-    private function getDefaultBlacklistBundle()
+    private function getEasyAdminChildren(ContainerBuilder $container)
     {
-        return [
-            'debug',
-            'doctrine',
-            'doctrine_cache',
-            'doctrine_migrations',
-            'framework',
-            'maker',
-            'monolog',
-            'security',
-            'sensio_framework_extra',
-            'swiftmailer',
-            'twig',
-            'web_profiler',
-            'web_server',
-        ];
+        $extensions = $container->getExtensions();
+        $configs = $container->getExtensionConfig($this->getAlias());
+        $config = $this->processConfiguration(new Configuration(), $configs);
+
+        $childrenConfig = [];
+        $nameConverter =  new SnakeCaseToCamelCaseNameConverter();
+
+        foreach ($extensions as $extension) {
+            if (!in_array($extension->getAlias(), $config['blacklisted_bundles']) || $config['enable_blacklist'] === false) {
+                $childrenConfig[] = [
+                    'label' => $nameConverter->handle($extension->getAlias()),
+                    'route' => 'barth_simpleconfig_edit',
+                    'params' => ['package' => $extension->getAlias()]
+                ];
+            }
+        }
+
+        return $childrenConfig;
     }
 }
