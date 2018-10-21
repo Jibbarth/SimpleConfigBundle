@@ -6,8 +6,14 @@ use Barth\SimpleConfigBundle\NameConverter\SnakeCaseToCamelCaseNameConverter;
 use Barth\SimpleConfigBundle\Service\ConfigService;
 use Barth\SimpleConfigBundle\Service\ExtensionLocatorService;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Config\Loader\DelegatingLoader;
+use Symfony\Component\Config\Loader\LoaderResolver;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
+use Symfony\Component\DependencyInjection\Loader\ClosureLoader;
+use Symfony\Component\DependencyInjection\Loader\DirectoryLoader;
+use Symfony\Component\DependencyInjection\Loader\GlobFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
@@ -39,8 +45,9 @@ class BarthSimpleConfigExtension extends Extension implements PrependExtensionIn
     public function prepend(ContainerBuilder $container)
     {
         $bundles = $container->getParameter('kernel.bundles');
-        $configs = $container->getExtensionConfig($this->getAlias());
-        $config = $this->processConfiguration(new Configuration(), $configs);
+
+        $this->loadOverrideConfig($container);
+        $config = $this->getExtensionConfig($container);
 
         if (isset($bundles['EasyAdminBundle']) && $config['enable_easyadmin_integration'] === true) {
             $easyConfig = [
@@ -55,6 +62,15 @@ class BarthSimpleConfigExtension extends Extension implements PrependExtensionIn
 
             $container->prependExtensionConfig('easy_admin', $easyConfig);
         }
+    }
+
+
+    private function loadOverrideConfig(ContainerBuilder $container)
+    {
+        $config = $this->getExtensionConfig($container);
+        $overrideLoader = $this->getContainerLoader($container);
+        $confDir = $container->getParameter('kernel.project_dir') . '/config';
+        $overrideLoader->load($confDir . '/packages/' . $config['override_package_directory'] . '/*.yaml', 'glob');
     }
 
     /**
@@ -79,5 +95,24 @@ class BarthSimpleConfigExtension extends Extension implements PrependExtensionIn
         }
 
         return $childrenConfig;
+    }
+
+    private function getExtensionConfig($container)
+    {
+        $configs = $container->getExtensionConfig($this->getAlias());
+        return $this->processConfiguration(new Configuration(), $configs);
+    }
+
+    private function getContainerLoader(ContainerInterface $container)
+    {
+        $locator = new FileLocator([]);
+        $resolver = new LoaderResolver(array(
+            new YamlFileLoader($container, $locator),
+            new GlobFileLoader($container, $locator),
+            new DirectoryLoader($container, $locator),
+            new ClosureLoader($container)
+        ));
+
+        return new DelegatingLoader($resolver);
     }
 }
