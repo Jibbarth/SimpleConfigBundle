@@ -17,10 +17,6 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
                 ->scalarNode('override_package_directory')->defaultValue('override')->end()
-                ->arrayNode('blacklisted_bundles_old')
-                    ->scalarPrototype()->end()
-                    ->beforeNormalization()->castToArray()->end()
-                ->end()
                 ->booleanNode('enable_blacklist')
                     ->defaultValue(true)
                 ->end()
