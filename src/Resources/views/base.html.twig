@@ -13,6 +13,7 @@
 {% for flashMessage in app.session.flashbag.get('success') %}
     <div class="message success">{{ flashMessage }}</div>
 {% endfor %}
-{% block content %}{% endblock %}
+{% block content_title %}{% endblock %}
+{% block main %}{% endblock %}
 </body>
 </html>

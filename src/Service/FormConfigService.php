@@ -38,6 +38,11 @@ class FormConfigService
 
     protected function addToForm(FormBuilder $formBuilder, string $key, $field)
     {
+        $params = [
+            'data' => $field,
+            'required' => false,
+            'translation_domain' => 'barth_simple_config',
+        ];
         switch (true) {
             case \is_array($field):
                 foreach ($field as $subKey => $value) {
@@ -45,7 +50,6 @@ class FormConfigService
                         $this->addToForm($formBuilder, $key . ':' . $subKey, $value);
                     }
                 }
-
                 return;
                 break;
 
@@ -65,9 +69,6 @@ class FormConfigService
         }
 
         $key = \str_replace('.', '-', $key);
-        $formBuilder->add($key, $type, [
-            'data' => $field,
-            'required' => false,
-        ]);
+        $formBuilder->add($key, $type, $params);
     }
 }

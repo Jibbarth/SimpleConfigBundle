@@ -2,6 +2,7 @@
 
 namespace Barth\SimpleConfigBundle\DependencyInjection;
 
+use Barth\SimpleConfigBundle\Controller\DefaultController;
 use Barth\SimpleConfigBundle\NameConverter\SnakeCaseToCamelCaseNameConverter;
 use Barth\SimpleConfigBundle\Service\ConfigService;
 use Barth\SimpleConfigBundle\Service\ExtensionLocatorService;
@@ -30,7 +31,12 @@ class BarthSimpleConfigExtension extends Extension implements PrependExtensionIn
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yml');
 
-        $container->getDefinition(ConfigService::class)->setArgument(1, $config['override_package_directory']);
+        $container->getDefinition(ConfigService::class)->setArgument('$overrideDir', $config['override_package_directory']);
+        $bundles = $container->getParameter('kernel.bundles');
+        if (isset($bundles['EasyAdminBundle']) && $config['enable_easyadmin_integration'] === true) {
+            $container->getDefinition(DefaultController::class)->setArgument('$defaultAdminBundle', 'easy_admin');
+        }
+
         if (true === $config['enable_blacklist']) {
             $this->blacklistedBundles = $config['blacklisted_bundles'];
             $container
