@@ -72,7 +72,8 @@ class FormConfigService
         if ('' !== $parentKey) {
             $key = $parentKey . ':' . $key;
         }
-        $key = \str_replace('.', '-', $key);
+        $key = \str_replace('.', '_dot_', $key);
+        $key = \str_replace('\\', '_backslash_', $key);
         $formBuilder->add($key, $type, $params);
     }
 

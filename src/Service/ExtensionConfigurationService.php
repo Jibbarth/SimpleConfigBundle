@@ -3,6 +3,7 @@
 namespace Barth\SimpleConfigBundle\Service;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
@@ -26,7 +27,25 @@ class ExtensionConfigurationService
         $this->kernel = $kernel;
     }
 
-    public function getConfiguration(ExtensionInterface $extension): array
+    /**
+     * @throws \Exception
+     */
+    public function validateConfiguration(ExtensionInterface $extension, array $configs): array
+    {
+        $configs[$extension->getAlias()] = $this->cleanConfig($configs[$extension->getAlias()], $this->getCurrentConfiguration($extension));
+        $processor = new Processor();
+        $container = $this->getContainerBuilder();
+        $container->resolveEnvPlaceholders(
+            $container->getParameterBag()->resolveValue(
+                $processor->processConfiguration($this->getExtensionConfiguration($extension), $configs)
+            )
+        );
+
+
+        return $configs[$extension->getAlias()];
+    }
+
+    public function getCurrentConfiguration(ExtensionInterface $extension): array
     {
         $config = [];
 
@@ -34,15 +53,14 @@ class ExtensionConfigurationService
             $container = $this->getContainerBuilder();
             $configs = $container->getExtensionConfig($extension->getAlias());
 
-            $configuration = $extension->getConfiguration($configs, $container);
             $configs = $container->resolveEnvPlaceholders(
                 $container->getParameterBag()->resolveValue($configs)
             );
-            $processor = new Processor();
 
+            $processor = new Processor();
             $config = $container->resolveEnvPlaceholders(
                 $container->getParameterBag()->resolveValue(
-                    $processor->processConfiguration($configuration, $configs)
+                    $processor->processConfiguration($this->getExtensionConfiguration($extension), $configs)
                 )
             );
         } catch (\Throwable $throwable) {
@@ -62,6 +80,14 @@ class ExtensionConfigurationService
         return $configuration->getConfigTreeBuilder();
     }
 
+    protected function getExtensionConfiguration(ExtensionInterface $extension): ConfigurationInterface
+    {
+        $container = $this->getContainerBuilder();
+        $configs = $container->getExtensionConfig($extension->getAlias());
+
+        return $extension->getConfiguration($configs, $container);
+    }
+
     protected function getContainerBuilder(): ContainerBuilder
     {
         if (null === $this->containerBuilder) {
@@ -77,5 +103,19 @@ class ExtensionConfigurationService
         }
 
         return $this->containerBuilder;
+    }
+
+    /**
+     * Remove key that is equals to current configuration
+     */
+    protected function cleanConfig(array $configs, array $currentConfig): array
+    {
+        foreach ($configs as $key => $config) {
+            if (isset($currentConfig[$key]) && $currentConfig[$key] === $config ) {
+                unset($configs[$key]);
+            }
+        }
+
+        return $configs;
     }
 }
