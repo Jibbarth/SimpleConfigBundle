@@ -37,9 +37,14 @@ class ConfigService
     public function parseConfig(array $config): array
     {
         foreach ($config as $key => $value) {
-            if (\strpos('-', $key)) {
+            if (\strpos($key, '_dot_')) {
                 unset($config[$key]);
-                $key = \str_replace('.', '-', $key);
+                $key = \str_replace('_dot_', '.', $key);
+                $config[$key] = $value;
+            }
+            if (\strpos($key, '_backslash_')) {
+                unset($config[$key]);
+                $key = \str_replace('_backslash_', '\\', $key);
                 $config[$key] = $value;
             }
             if (\strpos($key, ':')) {
