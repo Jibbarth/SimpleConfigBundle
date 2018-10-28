@@ -7,7 +7,6 @@ References this [documentation example](http://symfony.com/doc/current/bundles/c
 
 The mechanism behind is to retrieve all available configuration for a bundle, display it in a form, and dump the submitted data in a new _config file_ that will override the default configuration.
 
-
 ## Installation
 
 ### Step 1: Download the Bundle
@@ -16,36 +15,6 @@ Open a command console, enter your project directory and execute:
 
 ```console
 $ composer require barth/simple-config-bundle
-```
-
-> :warning: This is not already available as I didn't yet submit this package to [Packagist](https://packagist.org)
-> Stay tuned for update by giving a :star: ?
-
-Or open your `composer.json`, and add following content :
-
-```js
-{
-    // ...
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@github.com:Jibbarth/SimpleConfigBundle",
-            "vendor-alias": "barth"
-        }
-    ],
-    "require": {
-        //...
-        "barth/simple-config-bundle": "dev-master"
-    }
-    //...
-}
-```
-
-Open a command console, enter your project directory and execute the
-following command to download the latest stable version of this bundle:
-
-```console
-$ composer update
 ```
 
 This command requires you to have Composer installed globally, as explained
@@ -67,32 +36,7 @@ return [
 ];
 ```
 
-### Step 3: Active the override for configuration
-
-In your `src/Kernel.php`, alter the `configureContainer` function :
-
-```php
-    protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader)
-    {
-        $container->addResource(new FileResource($this->getProjectDir().'/config/bundles.php'));
-        // Feel free to remove the "container.autowiring.strict_mode" parameter
-        // if you are using symfony/dependency-injection 4.0+ as it's the default behavior
-        $container->setParameter('container.autowiring.strict_mode', true);
-        $container->setParameter('container.dumper.inline_class_loader', true);
-        $confDir = $this->getProjectDir().'/config';
-
-        $loader->load($confDir.'/{packages}/*'.self::CONFIG_EXTS, 'glob');
-        $loader->load($confDir.'/{packages}/'.$this->environment.'/**/*'.self::CONFIG_EXTS, 'glob');
-
-        // ADD THIS LINE
-        $loader->load($confDir.'/{packages}/override/**/*'.self::CONFIG_EXTS, 'glob');
-
-        $loader->load($confDir.'/{services}'.self::CONFIG_EXTS, 'glob');
-        $loader->load($confDir.'/{services}_'.$this->environment.self::CONFIG_EXTS, 'glob');
-    }
-```
-
-### Step 4: Import routes
+### Step 3: Import routes
 
 In your `config/routes.yaml`, add the following route definition :
 
@@ -132,10 +76,16 @@ When installation is completed, you have two new routes :
 * http://yourdomain.org/admin/config That exposes all available configuration routes
 * http://yourdomain.org/admin/config/{package} That display your form configuration
 
-## Customize
+## Customization and Integration
+
+### Custom Backend
 
 By default, pages don't look very pretty. To integrate it in your template, don't hesitate to override the `base.html.twig` template by creating a new one in `templates/bundles/BarthSimpleConfigBundle/` and make it extend your base template.
 
+### Third-party bundles
+
+SimpleConfigBundle can easily be integrated in [EasyAdminBundle](https://github.com/EasyCorp/EasyAdminBundle). 
+Just require it.
 
 ## Contribute
 
@@ -145,10 +95,11 @@ If you find any typo/misconfiguration/... please send me a PR or open an issue.
 
 Also, while creating your PR, please write a description which gives the context and/or explains why you are creating it.
 
-
 ## TODOs
 
-- [ ] Make installation as simple as a `composer require barth/simple-config-bundle`, so submit it to packagist
-- [ ] Process configuration when form is submitted to validate it immediatly.
+- [x] Make installation as simple as a `composer require barth/simple-config-bundle`, so submit it to packagist
+- [x] Process configuration when form is submitted to validate it immediatly.
 - [ ] Write Tests Suite
 - [ ] Add translations
+- [x] Integration with [EasyAdminBundle](https://github.com/EasyCorp/EasyAdminBundle)
+- [ ] Integration with [Sonata](https://sonata-project.org/)
