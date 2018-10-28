@@ -39,6 +39,6 @@
         }
     },
     "suggest": {
-        "easycorp/easyadmin-bundle": "Embed Config forms directly in EasyAdminBundle",
+        "easycorp/easyadmin-bundle": "Embed Config forms directly in EasyAdminBundle"
     }
 }
