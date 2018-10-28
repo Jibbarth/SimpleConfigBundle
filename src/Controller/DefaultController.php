@@ -74,25 +74,36 @@ class DefaultController extends Controller
         FormConfigService $formConfigService
     ): Response {
         $extension = $this->extensionLocatorService->retrieveByPackageName($package);
-        $config = $this->extensionConfigurationService->getConfiguration($extension);
+        $config = $this->extensionConfigurationService->getCurrentConfiguration($extension);
 
         $form = $formConfigService->getFormForConfig($config);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $nameConverter = new SnakeCaseToCamelCaseNameConverter();
             $data = $this->cleanData($form->getData());
-            // TODO validate configuration
+            try {
+                $data = $this->configService->parseConfig($data);
+                $data = $this->extensionConfigurationService->validateConfiguration($extension, [$extension->getAlias() => $data]);
+                $this->configService->saveNewConfig($package, $data);
+                if ($this->configService->isOverrideConfigForPackageExist($package)) {
+                    $nameConverter = new SnakeCaseToCamelCaseNameConverter();
+                    $this->get('session')->getFlashBag()->add(
+                        'success',
+                        'Successfully registered config for ' . $nameConverter->handle($package)
+                    );
+                }
 
-            $this->configService->saveNewConfig($package, $data);
-            if ($this->configService->isOverrideConfigForPackageExist($package)) {
-                $nameConverter = new SnakeCaseToCamelCaseNameConverter();
+                return $this->redirect($this->generateUrl('barth_simpleconfig_index'));
+            } catch (\Throwable $throwable) {
                 $this->get('session')->getFlashBag()->add(
-                    'success',
-                    'Successfully registered config for ' . $nameConverter->handle($package)
+                    'error',
+                    sprintf('Error for %s : %s',
+                        $nameConverter->handle($package),
+                        $throwable->getMessage()
+                    )
                 );
             }
-
-            return $this->redirect($this->generateUrl('barth_simpleconfig_index'));
         }
 
         $nameConverter = new SnakeCaseToCamelCaseNameConverter();

@@ -29,6 +29,13 @@ class ConfigService
     {
         $fs = new Filesystem();
         $packageOverrideFile = $this->getOverridePackagePath() . \DIRECTORY_SEPARATOR . $package . '.yaml';
+        $config = $this->parseConfig($config);
+
+        $fs->dumpFile($packageOverrideFile, Yaml::dump([$package => $config], 4));
+    }
+
+    public function parseConfig(array $config): array
+    {
         foreach ($config as $key => $value) {
             if (\strpos('-', $key)) {
                 unset($config[$key]);
@@ -40,7 +47,7 @@ class ConfigService
                 unset($config[$key]);
             }
         }
-        $fs->dumpFile($packageOverrideFile, Yaml::dump([$package => $config], 4));
+        return $config;
     }
 
     public function isOverrideConfigForPackageExist(string $package): bool
