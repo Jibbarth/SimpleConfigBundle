@@ -1,6 +1,7 @@
-{% extends "@BarthSimpleConfig/base.html.twig" %}
+{% extends parent_template %}
 
-{% block content %}
+{% block content_title %}Bundles configurations{% endblock %}
+{% block main %}
     <ul>
         {% for bundle in bundles %}
         <li>

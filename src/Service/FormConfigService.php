@@ -7,7 +7,7 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\FormBuilder;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 
@@ -16,7 +16,7 @@ class FormConfigService
     /**
      * @var FormFactoryInterface
      */
-    private $factory;
+    protected $factory;
 
     public function __construct(
         FormFactoryInterface $factory
@@ -36,16 +36,22 @@ class FormConfigService
         return $formBuilder->getForm();
     }
 
-    protected function addToForm(FormBuilder $formBuilder, string $key, $field)
+    protected function addToForm(FormBuilderInterface $formBuilder, string $key, $field, $parentKey = ''): void
     {
+        $params = [
+            'label' => $this->humanize($key) . (($parentKey) ? sprintf(' (%s)', $this->humanize($parentKey)) : null),
+            'data' => $field,
+            'required' => false,
+            'translation_domain' => 'barth_simple_config',
+        ];
         switch (true) {
             case \is_array($field):
                 foreach ($field as $subKey => $value) {
                     if (!\is_int($subKey)) {
-                        $this->addToForm($formBuilder, $key . ':' . $subKey, $value);
+
+                        $this->addToForm($formBuilder, $subKey, $value, ($parentKey) ? $parentKey . ':' . $key : $key);
                     }
                 }
-
                 return;
                 break;
 
@@ -63,11 +69,18 @@ class FormConfigService
             default:
                 return;
         }
-
+        if ('' !== $parentKey) {
+            $key = $parentKey . ':' . $key;
+        }
         $key = \str_replace('.', '-', $key);
-        $formBuilder->add($key, $type, [
-            'data' => $field,
-            'required' => false,
-        ]);
+        $formBuilder->add($key, $type, $params);
+    }
+
+    /**
+     * copied from Symfony\Component\Form\FormRenderer::humanize()
+     */
+    protected function humanize(string $text): string
+    {
+        return ucfirst(strtolower(trim(preg_replace(array('/([A-Z])/', '/[_\s]+/'), array('_$1', ' '), $text))));
     }
 }

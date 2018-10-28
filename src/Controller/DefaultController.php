@@ -2,6 +2,7 @@
 
 namespace Barth\SimpleConfigBundle\Controller;
 
+use Barth\SimpleConfigBundle\NameConverter\SnakeCaseToCamelCaseNameConverter;
 use Barth\SimpleConfigBundle\Service\ConfigService;
 use Barth\SimpleConfigBundle\Service\ExtensionConfigurationService;
 use Barth\SimpleConfigBundle\Service\ExtensionLocatorService;
@@ -28,15 +29,21 @@ class DefaultController extends Controller
      * @var ExtensionConfigurationService
      */
     private $extensionConfigurationService;
+    /**
+     * @var string
+     */
+    private $defaultAdminBundle;
 
     public function __construct(
         ConfigService $configService,
         ExtensionLocatorService $extensionLocatorService,
-        ExtensionConfigurationService $extensionConfigurationService
+        ExtensionConfigurationService $extensionConfigurationService,
+        string $defaultAdminBundle = null
     ) {
         $this->configService = $configService;
         $this->extensionLocatorService = $extensionLocatorService;
         $this->extensionConfigurationService = $extensionConfigurationService;
+        $this->defaultAdminBundle = $defaultAdminBundle;
     }
 
     /**
@@ -51,6 +58,7 @@ class DefaultController extends Controller
 
         return $this->render('@BarthSimpleConfig/list.html.twig', [
             'bundles' => $availableBundles,
+            'parent_template' => $this->getParentTemplate(),
         ]);
     }
 
@@ -77,18 +85,21 @@ class DefaultController extends Controller
 
             $this->configService->saveNewConfig($package, $data);
             if ($this->configService->isOverrideConfigForPackageExist($package)) {
+                $nameConverter = new SnakeCaseToCamelCaseNameConverter();
                 $this->get('session')->getFlashBag()->add(
                     'success',
-                    'Successfully registered config for ' . $package
+                    'Successfully registered config for ' . $nameConverter->handle($package)
                 );
             }
 
             return $this->redirect($this->generateUrl('barth_simpleconfig_index'));
         }
 
+        $nameConverter = new SnakeCaseToCamelCaseNameConverter();
         return $this->render('@BarthSimpleConfig/form.html.twig', [
             'config_form' => $form->createView(),
-            'extension' => $extension->getAlias(),
+            'extension' => $nameConverter->handle($extension->getAlias()),
+            'parent_template' => $this->getParentTemplate(),
         ]);
     }
 
@@ -101,5 +112,15 @@ class DefaultController extends Controller
         }
 
         return $data;
+    }
+
+    protected function getParentTemplate()
+    {
+        switch ($this->defaultAdminBundle) {
+            case 'easy_admin':
+                return '@EasyAdmin/default/layout.html.twig';
+            default:
+                return '@BarthSimpleConfig/base.html.twig';
+        }
     }
 }
