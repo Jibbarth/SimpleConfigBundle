@@ -2,13 +2,16 @@
 
 {% block content_title %}Bundles configurations{% endblock %}
 {% block main %}
-    <ul>
+    <main class="col-xs-12 col-12 row m-2">
         {% for bundle in bundles %}
-        <li>
-            <a href="{{ path('barth_simpleconfig_edit', {'package' : bundle}) }}" >
-                Edit {{ bundle }} configuration
-            </a>
-        </li>
+            <div class="col-3 border text-center m-2 p-1">
+                <h5 class="h5 text-capitalize">{{ bundle }}</h5>
+                <p class="mb-2">
+                    <a href="{{ path('barth_simpleconfig_edit', {'package' : bundle}) }}" class="btn btn-primary" >
+                        Edit  configuration
+                    </a>
+                </p>
+            </div>
         {% endfor %}
-    </ul>
+    </main>
 {% endblock %}
