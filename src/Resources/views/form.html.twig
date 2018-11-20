@@ -10,11 +10,16 @@
 {% block main %}
     {{ form_start(config_form, form_attr) }}
     <div class="row">
-    {% for child in config_form.children %}
-        <div class="col-xs-12">
-            {{ form_row(child) }}
-        </div>
-    {% endfor %}
+        {% for child in config_form.children if child.vars.name != 'save'%}
+            <div class="col-xs-12 col-12">
+                {{ form_row(child) }}
+            </div>
+        {% endfor %}
     </div>
-    {{ form_end(config_form) }}
+    <section class="content-footer">
+        <div class="form-actions">
+            {{ form_row(config_form.save, {attr:{class:'btn-primary'}}) }}
+        </div>
+        {{ form_end(config_form) }}
+    </section>
 {% endblock %}
