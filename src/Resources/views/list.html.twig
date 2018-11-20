@@ -4,13 +4,11 @@
 {% block main %}
     <main class="col-xs-12 col-12 row m-2">
         {% for bundle in bundles %}
-            <div class="col-3 border text-center m-2 p-1">
-                <h5 class="h5 text-capitalize">{{ bundle }}</h5>
-                <p class="mb-2">
-                    <a href="{{ path('barth_simpleconfig_edit', {'package' : bundle}) }}" class="btn btn-primary" >
-                        Edit  configuration
-                    </a>
-                </p>
+            <div class="col-xs-3 col-3 border text-center m-2 p-2">
+                <span class="h5 text-capitalize clearfix">{{ bundle }}</span>
+                <a href="{{ path('barth_simpleconfig_edit', {'package' : bundle}) }}" class="btn btn-primary btn-xs mt-3 mb-2" >
+                    Edit configuration
+                </a>
             </div>
         {% endfor %}
     </main>
