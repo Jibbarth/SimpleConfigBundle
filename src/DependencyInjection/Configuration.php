@@ -12,8 +12,15 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('barth_simpleconfig');
+        $treeBuilder = new TreeBuilder('barth_simpleconfig');
+
+        if (\method_exists($treeBuilder, 'getRootNode')) {
+            $rootNode = $treeBuilder->getRootNode();
+        } else {
+            // BC layer for symfony/config 4.1 and older
+            $rootNode = $treeBuilder->root('barth_simpleconfig');
+        }
+
         $rootNode
             ->children()
                 ->scalarNode('override_package_directory')->defaultValue('override')->end()
