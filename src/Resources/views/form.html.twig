@@ -1,12 +1,7 @@
 {% extends parent_template %}
 
-{% set form_attr = {} %}
-{% if 'EasyAdmin' in parent_template %}
-    {% form_theme config_form with easyadmin_config('design.form_theme') %}
-    {% set form_attr = {'attr': {'class':'form-horizontal'}} %}
-{% endif %}
+{% block content_title %}Settings for {{ extension | snakeToCamel }}{% endblock %}
 
-{% block content_title %}Settings for {{ extension }}{% endblock %}
 {% block main %}
     {{ form_start(config_form, form_attr) }}
     <div class="row">

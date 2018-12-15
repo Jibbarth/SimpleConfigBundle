@@ -8,7 +8,7 @@ services:
             $projectDir: '%kernel.project_dir%'
 
     Barth\SimpleConfigBundle\:
-        resource: '../../{Service}/*'
+        resource: '../../{Service,Twig,NameConverter}/*'
 
     Barth\SimpleConfigBundle\Controller\:
         resource: '../../Controller'

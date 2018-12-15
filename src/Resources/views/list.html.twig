@@ -5,7 +5,7 @@
     <main class="col-xs-12 col-12 row m-2">
         {% for bundle in bundles %}
             <div class="col-xs-3 col-3 border text-center m-2 p-2">
-                <span class="h5 text-capitalize clearfix">{{ bundle }}</span>
+                <span class="h5 text-capitalize clearfix">{{ bundle | snakeToCamel}}</span>
                 <a href="{{ path('barth_simpleconfig_edit', {'package' : bundle}) }}" class="btn btn-primary btn-xs mt-3 mb-2" >
                     Edit configuration
                 </a>
