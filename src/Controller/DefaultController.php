@@ -7,7 +7,7 @@ use Barth\SimpleConfigBundle\Service\ConfigService;
 use Barth\SimpleConfigBundle\Service\ExtensionConfigurationService;
 use Barth\SimpleConfigBundle\Service\ExtensionLocatorService;
 use Barth\SimpleConfigBundle\Service\FormConfigService;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class DefaultController.
  */
-class DefaultController extends Controller
+class DefaultController extends AbstractController
 {
     /**
      * @var ConfigService
@@ -106,10 +106,9 @@ class DefaultController extends Controller
             }
         }
 
-        $nameConverter = new SnakeCaseToCamelCaseNameConverter();
-        return $this->render('@BarthSimpleConfig/form.html.twig', [
+        return $this->render($this->getTemplate(), [
             'config_form' => $form->createView(),
-            'extension' => $nameConverter->handle($extension->getAlias()),
+            'extension' => $extension->getAlias(),
             'parent_template' => $this->getParentTemplate(),
         ]);
     }
@@ -132,6 +131,16 @@ class DefaultController extends Controller
                 return '@EasyAdmin/default/layout.html.twig';
             default:
                 return '@BarthSimpleConfig/base.html.twig';
+        }
+    }
+
+    protected function getTemplate()
+    {
+        switch ($this->defaultAdminBundle) {
+            case 'easy_admin':
+                return '@BarthSimpleConfig/easy_admin_form.html.twig';
+            default:
+                return '@BarthSimpleConfig/base_form.html.twig';
         }
     }
 }

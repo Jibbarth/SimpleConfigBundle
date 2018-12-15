@@ -1,0 +1,5 @@
+{% block main %}
+    {% form_theme config_form with easyadmin_config('design.form_theme') %}
+    {% set form_attr = {'attr': {'class':'form-horizontal'}} %}
+    {% embed '@BarthSimpleConfig/form.html.twig' %}{% endembed %}
+{% endblock %}
