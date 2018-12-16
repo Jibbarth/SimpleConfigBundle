@@ -1,0 +1,22 @@
+{% extends '@SonataAdmin/standard_layout.html.twig' %}
+{% block sonata_admin_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        <i class="fa fa-cogs"></i> {% block content_title %}{% endblock %}
+                    </h3>
+                </div>
+                <div class="box-body">
+                    <div class="list-group">
+                        {% if config_form is defined %}
+                            {% form_theme config_form '@SonataAdmin/Form/form_admin_fields.html.twig'%}
+                        {% endif %}
+                        {% block main %}{% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

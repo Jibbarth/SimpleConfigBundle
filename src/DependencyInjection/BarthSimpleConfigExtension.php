@@ -36,9 +36,11 @@ class BarthSimpleConfigExtension extends Extension implements PrependExtensionIn
         if (isset($bundles['EasyAdminBundle']) && $config['enable_easyadmin_integration'] === true) {
             $container->getDefinition(DefaultController::class)->setArgument('$defaultAdminBundle', 'easy_admin');
         }
+        if (isset($bundles['SonataAdminBundle']) && $config['enable_sonata_integration'] === true) {
+            $container->getDefinition(DefaultController::class)->setArgument('$defaultAdminBundle', 'sonata_admin');
+        }
 
         if (true === $config['enable_blacklist']) {
-            $this->blacklistedBundles = $config['blacklisted_bundles'];
             $container
                 ->getDefinition(ExtensionLocatorService::class)
                 ->setArgument(1, $config['blacklisted_bundles']);
