@@ -129,6 +129,8 @@ class DefaultController extends AbstractController
         switch ($this->defaultAdminBundle) {
             case 'easy_admin':
                 return '@EasyAdmin/default/layout.html.twig';
+            case 'sonata_admin':
+                return '@BarthSimpleConfig/sonata_base.html.twig';
             default:
                 return '@BarthSimpleConfig/base.html.twig';
         }
